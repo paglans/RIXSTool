@@ -94,7 +94,6 @@ Function load_file(filename)
 					do
        				sprintf str, "%s/%d", jsonpath,k
        				if(JSON_GetType(jsonId,str)==0)
-       					print "tjo"
        					NewDataFolder/S $(RemoveBadCharacters(str))
        					CreateItem(header_json,str)
        					SetDataFolder ::
