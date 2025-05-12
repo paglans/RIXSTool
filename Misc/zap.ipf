@@ -236,3 +236,11 @@ Function/WAVE onlineMoments(newValue, oldSeriesDetails)
 	detailsOut = {oldSeriesSize+1,meanOut,SigmaOut,SkewOut,KurtOut}
 	Return detailsOut
 end
+
+Function symmetryCheck(wv)
+	Wave wv
+	Variable peakpos
+	FindPeak wv
+	peakpos=V_PeakLoc
+	
+End

@@ -174,6 +174,7 @@ Function load_file(filename)
 	StrSwitch(scantype)
 		case "Image Single Motor Scan":
 		case "Single Motor Scan":
+		case "Multiple Single Motor Scan":
 			String wavenamelist
 			if(SVAR_Exists(instrument))
 				wavenamelist = instrument
@@ -186,14 +187,31 @@ Function load_file(filename)
 				SVAR/Z fileext=:Header:General:Instrument_s__0:Save_As
 			endif
 			NewDataFolder/S Images
+			Variable images
+			String extension
 				Strswitch(fileext)
 					case "png":
-						Variable images=numpnts(imagelist)
+						images=numpnts(imagelist)
 						if(images!=0)
 							do
 								imname = impath+ReplaceString("\\",replacestring("..\\",imagelist[imagecounter],""),":")
+								extension=""
+								SplitString/E="[[:alpha:]].[[:alpha:]]" imname,name,extension
 								// Check if file exists instead of using /Z below?
 								ImageLoad/T=rpng/Q/Z imname
+								imagecounter+=1
+							while(imagecounter<images)
+						endif
+						break
+					case "tiff":
+						images=numpnts(imagelist)
+						if(images!=0)
+							do
+								imname = impath+ReplaceString("\\",replacestring("..\\",imagelist[imagecounter],""),":")
+								extension=""
+								SplitString/E="[[:alpha:]].[[:alpha:]]" imname,name,extension
+								// Check if file exists instead of using /Z below?
+								ImageLoad/T=tiff/Q/Z imname
 								imagecounter+=1
 							while(imagecounter<images)
 						endif
@@ -748,6 +766,8 @@ Function DisplayImage()
 			CheckBox ch_zap value=zap
 			CheckBox ch_dark value=dark
 			CheckBox ch_graph value=graph
+			CheckBox ch_calcCurv value=curvature
+			CheckBox ch_applyCurv value=applyCurv
 			Variable m = 1 + WhichListItem(ctable, CTabList())
 			PopupMenu popup_ctab mode=m
 			Variable pnts=DimSize(imagew,2)
@@ -1079,8 +1099,13 @@ STRUCT WMCheckboxAction &CB_Struct
 				Wave curvCorr1D
 				String newname=image+"Corr"
 				String newname1D=image+"Corr1D"
+				String newname1DN=image+"Corr1DN"
 				Duplicate/O curvCorr,$newname
-				Duplicate/O curvCorr1D,$newname1d
+				Duplicate/O curvCorr1D,$newname1D
+				Duplicate/O curvCorr1D,$newname1DN
+				Wave tonorm=$newname1DN
+				WaveStats/Q tonorm
+				tonorm=(tonorm-V_min)/(V_max-V_min)
 			endif
 			DisplayImage()
 			SetDataFolder cdf
